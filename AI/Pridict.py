@@ -3,7 +3,8 @@ import numpy as np
 from tensorflow.keras.preprocessing import image
 from tensorflow import keras
 
-# Load model đã lưu
+
+# Load model đã lưu lai
 model = keras.models.load_model("MedicalClassification.h5")
 
 
