@@ -1,0 +1,56 @@
+package com.khanhlms.medical_store.entities;
+
+import jakarta.persistence.*;
+import jdk.jfr.Enabled;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
+
+@Setter
+@Getter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "Users")
+@Builder
+public class UserEntity implements UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
+    String username;
+    String password;
+    String email;
+    LocalDateTime lastLogin;
+    LocalDateTime created;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
+    }
+}

@@ -5,7 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
-    USER_EXISTED(1000,"user existed", HttpStatus.INTERNAL_SERVER_ERROR)
+    USER_EXISTED(1000,"user existed", HttpStatus.INTERNAL_SERVER_ERROR),
+    AUTHENTICATION_EXCEPTION(1001,"authentication exception", HttpStatus.UNAUTHORIZED),
     ;
     ErrorCode(int code, String message, HttpStatus httpStatus){
         this.code = code;

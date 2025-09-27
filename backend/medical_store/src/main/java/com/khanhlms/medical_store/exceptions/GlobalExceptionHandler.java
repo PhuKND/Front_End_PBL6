@@ -4,6 +4,8 @@ package com.khanhlms.medical_store.exceptions;
 import com.khanhlms.medical_store.dtos.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -22,6 +24,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AppException.class)
     ResponseEntity<ApiResponse<String>> handleAppException(AppException ex) {
         ErrorCode errorCode = ex.getErrorCode();
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build();
+        return ResponseEntity.status(errorCode.getHttpStatus().value()).body(apiResponse);
+    }
+    @ExceptionHandler(AuthenticationException.class)
+    ResponseEntity<ApiResponse<String>> handleAuthenticationException(AuthenticationException ex) {
+        ErrorCode errorCode = ErrorCode.AUTHENTICATION_EXCEPTION;
         ApiResponse<String> apiResponse = ApiResponse.<String>builder()
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())
