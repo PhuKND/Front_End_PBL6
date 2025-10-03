@@ -1,4 +1,4 @@
-package com.khanhlms.medical_store.dtos.requests;
+package com.khanhlms.medical_store.dtos.requests.auth;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
