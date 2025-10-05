@@ -1,6 +1,6 @@
 package com.khanhlms.medical_store.controllers;
 
-import com.khanhlms.medical_store.dtos.requests.IntrospectRequest;
+import com.khanhlms.medical_store.dtos.requests.auth.IntrospectRequest;
 import com.khanhlms.medical_store.dtos.requests.auth.LoginRequest;
 import com.khanhlms.medical_store.dtos.requests.auth.LogoutRequest;
 import com.khanhlms.medical_store.dtos.response.ApiResponse;
@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("${app.api.prefix}/auth")
