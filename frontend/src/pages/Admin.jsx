@@ -44,10 +44,7 @@ import { clearAuthTokens, apiLogout, isAdmin, getUserRole } from '../api/auth';
 import AdminDashboard from './Admin/AdminDashboard';
 import CategoriesManagement from './Admin/CategoriesManagement';
 import AdminProducts from './Admin/AdminProducts';
-<<<<<<< HEAD
 import AdminUser from './Admin/AdminUser';
-=======
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
 import ProtectedRoute from '../components/ProtectedRoute';
 
 const drawerWidth = 280;
@@ -113,13 +110,11 @@ const Admin = () => {
   ];
 
   useEffect(() => {
-    
     if (!isAdmin()) {
       navigate('/login');
       return;
     }
 
-    
     setUserInfo({
       name: 'Admin User',
       email: 'admin@medstore.com',
@@ -159,7 +154,6 @@ const Admin = () => {
 
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      
       <Box sx={{ p: 3, textAlign: 'center', borderBottom: '1px solid', borderColor: 'divider' }}>
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -182,7 +176,6 @@ const Admin = () => {
         </motion.div>
       </Box>
 
-      
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         <List sx={{ px: 2, py: 1 }}>
           {menuItems.map((item, index) => {
@@ -243,7 +236,6 @@ const Admin = () => {
         </List>
       </Box>
 
-      
       <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -282,176 +274,154 @@ const Admin = () => {
   return (
     <ProtectedRoute requiredRole="ADMIN">
       <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
-          bgcolor: 'white',
-          color: 'text.primary',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
-              {menuItems.find(item => item.path === location.pathname)?.text || 'Bảng điều khiển Admin'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Quản lý hệ thống MedStore
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            
-            <Tooltip title="Thông báo">
-              <IconButton sx={{ color: 'text.secondary' }}>
-                <Badge badgeContent={3} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-            </Tooltip>
-
-            
-            <Tooltip title="Tài khoản">
-              <IconButton
-                onClick={handleProfileMenuOpen}
-                sx={{ color: 'text.secondary' }}
-              >
-                <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
-                  <AccountCircleIcon />
-                </Avatar>
-              </IconButton>
-            </Tooltip>
-
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleProfileMenuClose}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              sx={{
-                '& .MuiPaper-root': {
-                  mt: 1,
-                  minWidth: 200,
-                  borderRadius: 2,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                }
-              }}
+        <AppBar
+          position="fixed"
+          sx={{
+            width: { md: `calc(100% - ${drawerWidth}px)` },
+            ml: { md: `${drawerWidth}px` },
+            bgcolor: 'white',
+            color: 'text.primary',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2, display: { md: 'none' } }}
             >
-              <MenuItem onClick={() => { handleProfileMenuClose(); navigate('/admin/profile'); }}>
-                <AccountCircleIcon sx={{ mr: 2, color: 'text.secondary' }} />
-                Thông tin cá nhân
-              </MenuItem>
-              <MenuItem onClick={() => { handleProfileMenuClose(); navigate('/admin/settings'); }}>
-                <SettingsIcon sx={{ mr: 2, color: 'text.secondary' }} />
-                Cài đặt
-              </MenuItem>
-              <Divider />
-              <MenuItem onClick={handleLogout}>
-                <LogoutIcon sx={{ mr: 2, color: 'error.main' }} />
-                Đăng xuất
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Toolbar>
-      </AppBar>
+              <MenuIcon />
+            </IconButton>
 
-      
-      <Box
-        component="nav"
-        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
-      >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-              bgcolor: 'background.paper',
-              borderRight: '1px solid',
-              borderColor: 'divider'
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-              bgcolor: 'background.paper',
-              borderRight: '1px solid',
-              borderColor: 'divider'
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                {menuItems.find(item => item.path === location.pathname)?.text || 'Bảng điều khiển Admin'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Quản lý hệ thống MedStore
+              </Typography>
+            </Box>
 
-      
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          minHeight: '100vh',
-          bgcolor: 'grey.50'
-        }}
-      >
-        <Toolbar />
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Tooltip title="Thông báo">
+                <IconButton sx={{ color: 'text.secondary' }}>
+                  <Badge badgeContent={3} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Tài khoản">
+                <IconButton onClick={handleProfileMenuOpen} sx={{ color: 'text.secondary' }}>
+                  <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+                    <AccountCircleIcon />
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleProfileMenuClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                sx={{
+                  '& .MuiPaper-root': {
+                    mt: 1,
+                    minWidth: 200,
+                    borderRadius: 2,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                  }
+                }}
+              >
+                <MenuItem onClick={() => { handleProfileMenuClose(); navigate('/admin/profile'); }}>
+                  <AccountCircleIcon sx={{ mr: 2, color: 'text.secondary' }} />
+                  Thông tin cá nhân
+                </MenuItem>
+                <MenuItem onClick={() => { handleProfileMenuClose(); navigate('/admin/settings'); }}>
+                  <SettingsIcon sx={{ mr: 2, color: 'text.secondary' }} />
+                  Cài đặt
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleLogout}>
+                  <LogoutIcon sx={{ mr: 2, color: 'error.main' }} />
+                  Đăng xuất
+                </MenuItem>
+              </Menu>
+            </Box>
+          </Toolbar>
+        </AppBar>
+
+        <Box component="nav" sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}>
+          <Drawer
+            variant="temporary"
+            open={mobileOpen}
+            onClose={handleDrawerToggle}
+            ModalProps={{ keepMounted: true }}
+            sx={{
+              display: { xs: 'block', md: 'none' },
+              '& .MuiDrawer-paper': {
+                boxSizing: 'border-box',
+                width: drawerWidth,
+                bgcolor: 'background.paper',
+                borderRight: '1px solid',
+                borderColor: 'divider'
+              }
+            }}
           >
-            <Routes>
-              <Route path="dashboard" element={<AdminDashboard />} />
-<<<<<<< HEAD
-              <Route path="users" element={<AdminUser />} />
-=======
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
-              <Route path="categories" element={<CategoriesManagement />} />
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="" element={<AdminDashboard />} />
-            </Routes>
-          </motion.div>
-        </AnimatePresence>
+            {drawer}
+          </Drawer>
+          <Drawer
+            variant="permanent"
+            sx={{
+              display: { xs: 'none', md: 'block' },
+              '& .MuiDrawer-paper': {
+                boxSizing: 'border-box',
+                width: drawerWidth,
+                bgcolor: 'background.paper',
+                borderRight: '1px solid',
+                borderColor: 'divider'
+              }
+            }}
+            open
+          >
+            {drawer}
+          </Drawer>
+        </Box>
+
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            width: { md: `calc(100% - ${drawerWidth}px)` },
+            minHeight: '100vh',
+            bgcolor: 'grey.50'
+          }}
+        >
+          <Toolbar />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Routes>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="users" element={<AdminUser />} />
+                <Route path="categories" element={<CategoriesManagement />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="" element={<AdminDashboard />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
+        </Box>
       </Box>
-    </Box>
     </ProtectedRoute>
   );
 };

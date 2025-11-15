@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
+
+import {
   AppBar,
   Toolbar,
   Typography,
@@ -12,24 +13,20 @@ import {
   Badge,
   Drawer,
   List,
-  ListItem,
+  ListItemButton,
   ListItemText,
   Divider,
   useTheme,
-  useMediaQuery,
   Menu,
   MenuItem,
-<<<<<<< HEAD
   Avatar,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
-=======
-  Avatar
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
+  DialogActions,
 } from '@mui/material';
-import { 
+
+import {
   Search as SearchIcon,
   ShoppingCart as ShoppingCartIcon,
   Person as PersonIcon,
@@ -43,15 +40,18 @@ import {
   LocationOn as LocationOnIcon,
   Schedule as ScheduleIcon,
   Logout as LogoutIcon,
-  Assessment as AssessmentIcon
+  Assessment as AssessmentIcon,
+  LocalPharmacy as LocalPharmacyIcon,
 } from '@mui/icons-material';
-import { LocalPharmacy as LocalPharmacyIcon } from '@mui/icons-material';
+
 import { useNavigate } from 'react-router-dom';
 import { styled, alpha } from '@mui/material/styles';
+
 import CameraModal from './CameraModal';
 import ImageUpload from './ImageUpload';
-import { clearAuthTokens, apiLogout, isAdmin, getUserRole } from '../api/auth';
+import { clearAuthTokens, apiLogout, getUserRole } from '../api/auth';
 
+// ================= styled =================
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: theme.shape.borderRadius,
@@ -92,7 +92,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+// ================= component =================
 const Header = ({ onSearch }) => {
+  const theme = useTheme();
+  const navigate = useNavigate();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -101,13 +105,7 @@ const Header = ({ onSearch }) => {
   const [userInfo, setUserInfo] = useState(null);
   const [userRole, setUserRole] = useState('USER');
   const [anchorEl, setAnchorEl] = useState(null);
-<<<<<<< HEAD
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-=======
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
-  const navigate = useNavigate();
 
   const categories = [
     'Tổng quan sản phẩm',
@@ -116,29 +114,24 @@ const Header = ({ onSearch }) => {
     'Thực phẩm dinh dưỡng',
     'Hỗ trợ tình dục',
     'Tiêm Vắc Xin',
-    'Tư vấn với Bác Sĩ'
+    'Tư vấn với Bác Sĩ',
   ];
 
-
+  // -------- auth state from localStorage + events --------
   useEffect(() => {
     const checkAuthStatus = () => {
       const accessToken = localStorage.getItem('accessToken');
       const refreshToken = localStorage.getItem('refreshToken');
-      
+
       if (accessToken && refreshToken) {
         setIsLoggedIn(true);
         const role = getUserRole();
         setUserRole(role);
-        
 
-        const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
+        const u = JSON.parse(localStorage.getItem('user') || '{}');
         setUserInfo({
-          name: userInfo.name || userInfo.username || 'User',
-<<<<<<< HEAD
-          email: userInfo.email || 'khanhphuminh@gmail.com'
-=======
-          email: userInfo.email || 'user@example.com'
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
+          name: u.name || u.username || 'User',
+          email: u.email || 'user@example.com',
         });
       } else {
         setIsLoggedIn(false);
@@ -148,10 +141,7 @@ const Header = ({ onSearch }) => {
     };
 
     checkAuthStatus();
-    
-
     window.addEventListener('storage', checkAuthStatus);
-    
 
     const handleUserLogin = (event) => {
       setIsLoggedIn(true);
@@ -159,81 +149,58 @@ const Header = ({ onSearch }) => {
       const role = getUserRole();
       setUserRole(role);
     };
-    
     window.addEventListener('userLoggedIn', handleUserLogin);
-    
+
     return () => {
       window.removeEventListener('storage', checkAuthStatus);
       window.removeEventListener('userLoggedIn', handleUserLogin);
     };
   }, []);
 
+  // -------- handlers --------
   const handleSearch = (e) => {
     e.preventDefault();
     const keyword = searchQuery.trim();
     if (!keyword) return;
-    if (onSearch) {
-      onSearch(keyword);
-    }
 
+    onSearch?.(keyword);
     navigate(`/search?keyword=${encodeURIComponent(keyword)}&page=0&size=10`);
   };
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const handleCameraClick = () => {
-    setIsCameraOpen(true);
-  };
-
-  const handleImageUploadClick = () => {
-    setIsImageUploadOpen(true);
-  };
+  const toggleMenu = () => setIsMenuOpen((s) => !s);
 
   const handleImageProcessed = (result) => {
-    const prediction = result.prediction || '';
+    const prediction = result?.prediction || '';
     const keyword = String(prediction).trim();
     setSearchQuery(keyword);
     setIsCameraOpen(false);
     setIsImageUploadOpen(false);
+
     if (keyword) {
-      if (onSearch) {
-        onSearch(keyword);
-      }
+      onSearch?.(keyword);
       navigate(`/search?keyword=${encodeURIComponent(keyword)}&page=0&size=10`);
     }
   };
 
-  const handleUserMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleUserMenuClose = () => {
-    setAnchorEl(null);
-  };
+  const handleUserMenuClick = (event) => setAnchorEl(event.currentTarget);
+  const handleUserMenuClose = () => setAnchorEl(null);
 
   const handleLogout = async () => {
     try {
-
       await apiLogout();
     } catch (error) {
       console.error('Logout API error:', error);
-
     } finally {
-
       clearAuthTokens();
       setIsLoggedIn(false);
       setUserInfo(null);
       setUserRole('USER');
       setAnchorEl(null);
-      
 
       const logoutEvent = new CustomEvent('userLoggedOut');
       window.dispatchEvent(logoutEvent);
-      
-      navigate('/');
 
+      navigate('/');
       window.location.reload();
     }
   };
@@ -264,26 +231,36 @@ const Header = ({ onSearch }) => {
     }
   };
 
+  const goCategory = (category) => {
+    const lower = category.toLowerCase();
+    if (lower === 'tổng quan sản phẩm') {
+      navigate('/products');
+    } else if (lower === 'tư vấn với bác sĩ') {
+      navigate('/consult');
+    } else {
+      const slug = category.trim().replace(/\s+/g, '-');
+      navigate(`/category/${encodeURIComponent(slug)}`);
+    }
+  };
+
   return (
     <>
+      {/* Top strip */}
       <Box sx={{ bgcolor: 'primary.main', color: 'white', py: 1 }}>
         <Container maxWidth="lg">
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PhoneIcon fontSize="small" />
-<<<<<<< HEAD
                 <Typography variant="body2">Tư vấn: 0123456789</Typography>
-=======
                 <Typography variant="body2">Tư vấn: 0334467772</Typography>
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
               </Box>
               <Typography variant="body2">Giờ làm việc: 8:00 - 22:00</Typography>
             </Box>
             <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
               <Typography variant="body2">Hỗ trợ khách hàng</Typography>
               {!isLoggedIn && (
-                <Typography 
+                <Typography
                   variant="body2"
                   onClick={() => navigate('/login')}
                   sx={{ cursor: 'pointer', '&:hover': { color: 'warning.light' } }}
@@ -296,9 +273,11 @@ const Header = ({ onSearch }) => {
         </Container>
       </Box>
 
+      {/* AppBar */}
       <AppBar position="sticky" elevation={1} sx={{ bgcolor: 'white', color: 'text.primary' }}>
         <Container maxWidth="lg">
           <Toolbar sx={{ py: 2 }}>
+            {/* Logo */}
             <motion.div
               whileHover={{ scale: 1.05 }}
               onClick={() => navigate('/')}
@@ -315,6 +294,7 @@ const Header = ({ onSearch }) => {
               </Box>
             </motion.div>
 
+            {/* Search (desktop) */}
             <Box sx={{ flexGrow: 1, mx: 4, display: { xs: 'none', lg: 'block' } }}>
               <form onSubmit={handleSearch}>
                 <Search sx={{ bgcolor: 'grey.100', color: 'text.primary' }}>
@@ -327,42 +307,31 @@ const Header = ({ onSearch }) => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <Box sx={{ 
-                    position: 'absolute', 
-                    right: 8, 
-                    top: '50%', 
-                    transform: 'translateY(-50%)',
-                    display: 'flex',
-                    gap: 1
-                  }}>
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      right: 8,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      display: 'flex',
+                      gap: 1,
+                    }}
+                  >
                     <IconButton
-                      onClick={handleCameraClick}
-                      sx={{ 
-                        color: 'primary.main',
-                        '&:hover': { bgcolor: 'primary.light' }
-                      }}
+                      onClick={() => setIsCameraOpen(true)}
+                      sx={{ color: 'primary.main', '&:hover': { bgcolor: 'primary.light' } }}
                       title="Chụp ảnh"
                     >
                       <CameraIcon />
                     </IconButton>
                     <IconButton
-                      onClick={handleImageUploadClick}
-                      sx={{ 
-                        color: 'primary.main',
-                        '&:hover': { bgcolor: 'primary.light' }
-                      }}
+                      onClick={() => setIsImageUploadOpen(true)}
+                      sx={{ color: 'primary.main', '&:hover': { bgcolor: 'primary.light' } }}
                       title="Tải ảnh"
                     >
                       <ImageIcon />
                     </IconButton>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      sx={{
-                        bgcolor: 'primary.main',
-                        '&:hover': { bgcolor: 'primary.dark' }
-                      }}
-                    >
+                    <Button type="submit" variant="contained" sx={{ bgcolor: 'primary.main', '&:hover': { bgcolor: 'primary.dark' } }}>
                       Tìm kiếm
                     </Button>
                   </Box>
@@ -370,16 +339,14 @@ const Header = ({ onSearch }) => {
               </form>
             </Box>
 
+            {/* Right zone */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {/* User */}
               {isLoggedIn ? (
                 <motion.div whileHover={{ scale: 1.1 }}>
                   <IconButton
                     onClick={handleUserMenuClick}
-                    sx={{ 
-                      display: { xs: 'none', md: 'flex' },
-                      color: 'text.primary',
-                      '&:hover': { color: 'primary.main' }
-                    }}
+                    sx={{ display: { xs: 'none', md: 'flex' }, color: 'text.primary', '&:hover': { color: 'primary.main' } }}
                   >
                     <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
                       {userInfo?.name?.charAt(0) || <PersonIcon />}
@@ -389,21 +356,15 @@ const Header = ({ onSearch }) => {
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     onClose={handleUserMenuClose}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'right',
-                    }}
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                    }}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                     sx={{
                       '& .MuiPaper-root': {
                         mt: 1,
                         minWidth: 200,
                         borderRadius: 2,
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                      }
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                      },
                     }}
                   >
                     {userRole === 'ADMIN' && (
@@ -439,27 +400,18 @@ const Header = ({ onSearch }) => {
                 <motion.div whileHover={{ scale: 1.1 }}>
                   <Button
                     startIcon={<PersonIcon />}
-                    sx={{ 
-                      display: { xs: 'none', md: 'flex' },
-                      color: 'text.primary',
-                      '&:hover': { color: 'primary.main' }
-                    }}
+                    sx={{ display: { xs: 'none', md: 'flex' }, color: 'text.primary', '&:hover': { color: 'primary.main' } }}
                     onClick={() => navigate('/login')}
                   >
                     Đăng nhập
                   </Button>
                 </motion.div>
               )}
-              
+
+              {/* Cart (one place only) */}
               <motion.div whileHover={{ scale: 1.1 }}>
-<<<<<<< HEAD
                 <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                  }}
+                  sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}
                   onClick={() => {
                     const token = localStorage.getItem('accessToken');
                     if (!token) {
@@ -478,27 +430,16 @@ const Header = ({ onSearch }) => {
                     Giỏ hàng
                   </Typography>
                 </Box>
-=======
-                <IconButton sx={{ color: 'text.primary', '&:hover': { color: 'primary.main' } }}>
-                  <Badge badgeContent={0} color="error">
-                    <ShoppingCartIcon />
-                  </Badge>
-                </IconButton>
-                <Typography variant="body2" sx={{ display: { xs: 'none', md: 'block' } }}>
-                  Giỏ hàng
-                </Typography>
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
               </motion.div>
 
-              <IconButton
-                onClick={toggleMenu}
-                sx={{ display: { xs: 'block', lg: 'none' } }}
-              >
+              {/* Mobile menu button */}
+              <IconButton onClick={toggleMenu} sx={{ display: { xs: 'block', lg: 'none' } }}>
                 <MenuIcon />
               </IconButton>
             </Box>
           </Toolbar>
 
+          {/* Search (mobile) */}
           <Box sx={{ display: { xs: 'block', lg: 'none' }, pb: 2 }}>
             <form onSubmit={handleSearch}>
               <Search sx={{ bgcolor: 'grey.100', color: 'text.primary' }}>
@@ -517,32 +458,20 @@ const Header = ({ onSearch }) => {
         </Container>
       </AppBar>
 
+      {/* Categories (desktop) */}
       <Box sx={{ bgcolor: 'primary.main', color: 'white' }}>
         <Container maxWidth="lg">
-          <Box sx={{ 
-            display: { xs: 'none', lg: 'flex' }, 
-            gap: 4, 
-            py: 1.5,
-            '& > *': { cursor: 'pointer' }
-          }}>
-            {categories.map((category, index) => (
-              <motion.div key={index} whileHover={{ y: -2 }} onClick={() => {
-                if (category.toLowerCase() === 'tổng quan sản phẩm') {
-                  navigate('/products');
-                } else if (category.toLowerCase() === 'tư vấn với bác sĩ') {
-                  navigate('/consult');
-                } else {
-                  const slug = category.trim().replace(/\s+/g, '-');
-                  navigate(`/category/${encodeURIComponent(slug)}`);
-                }
-              }}>
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    fontWeight: 500,
-                    '&:hover': { color: 'warning.light' }
-                  }}
-                >
+          <Box
+            sx={{
+              display: { xs: 'none', lg: 'flex' },
+              gap: 4,
+              py: 1.5,
+              '& > *': { cursor: 'pointer' },
+            }}
+          >
+            {categories.map((category) => (
+              <motion.div key={category} whileHover={{ y: -2 }} onClick={() => goCategory(category)}>
+                <Typography variant="body1" sx={{ fontWeight: 500, '&:hover': { color: 'warning.light' } }}>
                   {category}
                 </Typography>
               </motion.div>
@@ -551,17 +480,14 @@ const Header = ({ onSearch }) => {
         </Container>
       </Box>
 
+      {/* Drawer (mobile) */}
       <Drawer
         anchor="top"
         open={isMenuOpen}
         onClose={toggleMenu}
-        sx={{ 
+        sx={{
           display: { xs: 'block', lg: 'none' },
-          '& .MuiDrawer-paper': { 
-            top: 'auto',
-            height: 'auto',
-            maxHeight: '80vh'
-          }
+          '& .MuiDrawer-paper': { top: 'auto', height: 'auto', maxHeight: '80vh' },
         }}
       >
         <Box sx={{ p: 2 }}>
@@ -571,81 +497,117 @@ const Header = ({ onSearch }) => {
               <CloseIcon />
             </IconButton>
           </Box>
+
           <List>
-            {categories.map((category, index) => (
-              <ListItem key={index} button onClick={toggleMenu}>
+            {categories.map((category) => (
+              <ListItemButton
+                key={category}
+                onClick={() => {
+                  toggleMenu();
+                  goCategory(category);
+                }}
+              >
                 <ListItemText primary={category} />
-              </ListItem>
+              </ListItemButton>
             ))}
+
             <Divider sx={{ my: 1 }} />
+
             {!isLoggedIn && (
-              <ListItem 
-                button 
-                onClick={() => { 
-                  toggleMenu(); 
-                  navigate('/login'); 
+              <ListItemButton
+                onClick={() => {
+                  toggleMenu();
+                  navigate('/login');
                 }}
               >
                 <ListItemText primary="Đăng nhập" />
-              </ListItem>
+              </ListItemButton>
             )}
+
             {isLoggedIn && (
               <>
+                {/* Admin */}
                 {userRole === 'ADMIN' && (
-                  <ListItem button onClick={() => { toggleMenu(); handleMenuItemClick('admin-dashboard'); }}>
+                  <ListItemButton
+                    onClick={() => {
+                      toggleMenu();
+                      handleMenuItemClick('admin-dashboard');
+                    }}
+                  >
                     <ListItemText primary="Bảng điều khiển Admin" />
-                  </ListItem>
+                  </ListItemButton>
                 )}
-                <ListItem button onClick={() => { toggleMenu(); handleMenuItemClick('profile'); }}>
+
+                <ListItemButton
+                  onClick={() => {
+                    toggleMenu();
+                    handleMenuItemClick('profile');
+                  }}
+                >
                   <ListItemText primary="Thông tin cá nhân" />
-                </ListItem>
-                <ListItem button onClick={() => { toggleMenu(); handleMenuItemClick('orders'); }}>
+                </ListItemButton>
+
+                <ListItemButton
+                  onClick={() => {
+                    toggleMenu();
+                    handleMenuItemClick('orders');
+                  }}
+                >
                   <ListItemText primary="Đơn hàng của tôi" />
-                </ListItem>
-                <ListItem button onClick={() => { toggleMenu(); handleMenuItemClick('addresses'); }}>
+                </ListItemButton>
+
+                <ListItemButton
+                  onClick={() => {
+                    toggleMenu();
+                    handleMenuItemClick('addresses');
+                  }}
+                >
                   <ListItemText primary="Địa chỉ nhận hàng" />
-                </ListItem>
-                <ListItem button onClick={() => { toggleMenu(); handleMenuItemClick('vaccination-schedule'); }}>
+                </ListItemButton>
+
+                <ListItemButton
+                  onClick={() => {
+                    toggleMenu();
+                    handleMenuItemClick('vaccination-schedule');
+                  }}
+                >
                   <ListItemText primary="Lịch hẹn tiêm chủng" />
-                </ListItem>
+                </ListItemButton>
+
                 <Divider sx={{ my: 1 }} />
-                <ListItem button onClick={() => { toggleMenu(); handleMenuItemClick('logout'); }}>
+
+                <ListItemButton
+                  onClick={() => {
+                    toggleMenu();
+                    handleMenuItemClick('logout');
+                  }}
+                >
                   <ListItemText primary="Đăng xuất" />
-                </ListItem>
+                </ListItemButton>
               </>
             )}
-            <ListItem button onClick={toggleMenu}>
+
+            <ListItemButton
+              onClick={() => {
+                toggleMenu();
+                // TODO: điều hướng trang hỗ trợ nếu có
+              }}
+            >
               <ListItemText primary="Hỗ trợ khách hàng" />
-            </ListItem>
+            </ListItemButton>
           </List>
         </Box>
       </Drawer>
 
-      <CameraModal
-        open={isCameraOpen}
-        onClose={() => setIsCameraOpen(false)}
-        onImageCaptured={handleImageProcessed}
-      />
+      {/* Camera & Upload modals */}
+      <CameraModal open={isCameraOpen} onClose={() => setIsCameraOpen(false)} onImageCaptured={handleImageProcessed} />
+      <ImageUpload open={isImageUploadOpen} onClose={() => setIsImageUploadOpen(false)} onImageProcessed={handleImageProcessed} />
 
-      <ImageUpload
-        open={isImageUploadOpen}
-        onClose={() => setIsImageUploadOpen(false)}
-        onImageProcessed={handleImageProcessed}
-      />
-<<<<<<< HEAD
-
-      {/* Auth Dialog for Cart */}
-      <Dialog
-        open={authDialogOpen}
-        onClose={() => setAuthDialogOpen(false)}
-        maxWidth="xs"
-        fullWidth
-      >
+      {/* Auth dialog (Cart) */}
+      <Dialog open={authDialogOpen} onClose={() => setAuthDialogOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700 }}>Yêu cầu đăng nhập</DialogTitle>
         <DialogContent dividers>
-          <Typography>
-            Vui lòng đăng nhập để xem giỏ hàng của bạn.
-          </Typography>
+          <Typography>Vui lòng đăng nhập để xem giỏ hàng của bạn.</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAuthDialogOpen(false)}>Để sau</Button>
@@ -660,8 +622,6 @@ const Header = ({ onSearch }) => {
           </Button>
         </DialogActions>
       </Dialog>
-=======
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
     </>
   );
 };

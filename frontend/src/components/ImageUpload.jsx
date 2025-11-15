@@ -20,6 +20,8 @@ import {
 
 const API_BASE = 'http://127.0.0.1:5000';
 
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
 const checkApiHealth = async () => {
   try {
     const response = await fetch(`${API_BASE}/api/health`, {
@@ -33,20 +35,28 @@ const checkApiHealth = async () => {
   }
 };
 
-
+// Thử health nhiều lần ngắn (tránh “lần đầu chưa kịp ấm”)
+const ensureApiHealthy = async (retries = 2, baseDelay = 300) => {
+  for (let i = 0; i <= retries; i++) {
+    const ok = await checkApiHealth();
+    if (ok) return true;
+    await sleep(baseDelay * (i + 1));
+  }
+  return false;
+};
 
 const normalizeApiResult = (data) => {
   const vi = data?.prediction_vi;
-  const en = data?.prediction_en || data?.prediction; 
+  const en = data?.prediction_en || data?.prediction;
   const confNum = typeof data?.confidence === 'number' ? data.confidence : Number(data?.confidence);
-  const classIndex = (data?.class_index ?? data?.classIndex);
+  const classIndex = data?.class_index ?? data?.classIndex;
 
   return {
-    prediction: vi || data?.prediction || en || null, 
+    prediction: vi || data?.prediction || en || null,
     prediction_vi: vi ?? null,
     prediction_en: en ?? null,
     class_index: typeof classIndex === 'number' ? classIndex : null,
-    confidence: Number.isFinite(confNum) ? confNum : null
+    confidence: Number.isFinite(confNum) ? confNum : null,
   };
 };
 
@@ -60,6 +70,13 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
   const [result, setResult] = useState(null);
   const fileInputRef = React.useRef(null);
 
+  const resetFileInput = () => {
+    if (fileInputRef.current) {
+      // Xóa giá trị để lần sau chọn lại cùng file vẫn fire onChange
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleFileSelect = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -71,9 +88,13 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
 
     setSelectedFile(file);
     setError(null);
+
     const reader = new FileReader();
     reader.onload = (e) => setPreview(e.target.result);
     reader.readAsDataURL(file);
+
+    // Quan trọng: reset input ngay sau khi đọc
+    resetFileInput();
   };
 
   const handleDrop = (event) => {
@@ -88,6 +109,7 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
 
     setSelectedFile(file);
     setError(null);
+
     const reader = new FileReader();
     reader.onload = (e) => setPreview(e.target.result);
     reader.readAsDataURL(file);
@@ -97,48 +119,60 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
     event.preventDefault();
   };
 
+  const sendClassify = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch(`${API_BASE}/api/classify-image`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      console.error('JSON parse error:', jsonError);
+      throw new Error('API không trả JSON hợp lệ. Vui lòng kiểm tra kết nối server.');
+    }
+
+    if (!response.ok) {
+      throw new Error(data?.error || `Lỗi server: ${response.status}`);
+    }
+
+    return data;
+  };
+
   const processImage = async () => {
-    if (!selectedFile) return;
+    const file = selectedFile;
+    if (!file) return;
 
     setIsLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const isApiHealthy = await checkApiHealth();
-      if (!isApiHealthy) {
-        throw new Error('API server không sẵn sàng. Vui lòng kiểm tra kết nối.');
-      }
-
-      const formData = new FormData();
-      formData.append('image', selectedFile);
-
-      const response = await fetch(`${API_BASE}/api/classify-image`, {
-        method: 'POST',
-        body: formData
-      });
+      // Thử “làm ấm” API nhưng KHÔNG chặn luồng nếu chưa healthy
+      await ensureApiHealthy(2, 300);
 
       let data;
       try {
-        data = await response.json();
-      } catch (jsonError) {
-        console.error('JSON parse error:', jsonError);
-        throw new Error('API không trả JSON hợp lệ. Vui lòng kiểm tra kết nối server.');
+        data = await sendClassify(file);
+      } catch (err1) {
+        // Retry 1 lần ngắn nếu lần đầu fail (thường do warm-up)
+        await sleep(500);
+        data = await sendClassify(file);
       }
 
-      if (!response.ok) {
-        throw new Error(data?.error || `Lỗi server: ${response.status}`);
-      }
-
-      
       const normalized = normalizeApiResult(data);
 
-      if (!normalized.prediction || normalized.confidence === null) {
+      // Nới điều kiện: chỉ cần có prediction, không bắt buộc confidence
+      if (!normalized.prediction) {
         throw new Error('Dữ liệu trả về không hợp lệ');
       }
 
       setResult(normalized);
-      onImageProcessed && onImageProcessed(normalized);
+      if (onImageProcessed) onImageProcessed(normalized);
     } catch (err) {
       console.error('Process image error:', err);
       setError('Lỗi khi xử lý ảnh: ' + err.message);
@@ -152,6 +186,7 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
     setPreview(null);
     setResult(null);
     setError(null);
+    resetFileInput();
     onClose && onClose();
   };
 
@@ -204,8 +239,8 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
                 cursor: 'pointer',
                 '&:hover': {
                   borderColor: 'primary.main',
-                  backgroundColor: 'action.hover'
-                }
+                  backgroundColor: 'action.hover',
+                },
               }}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
@@ -234,7 +269,7 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
                   maxWidth: '640px',
                   height: 'auto',
                   borderRadius: '8px',
-                  border: '2px solid #e0e0e0'
+                  border: '2px solid #e0e0e0',
                 }}
               />
             </Box>
@@ -263,6 +298,7 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
                 setPreview(null);
                 setError(null);
                 setResult(null);
+                resetFileInput();
               }}
               color="secondary"
               disabled={isLoading}

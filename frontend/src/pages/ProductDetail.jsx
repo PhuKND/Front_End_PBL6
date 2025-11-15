@@ -1,22 +1,14 @@
-<<<<<<< HEAD
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-=======
-import React, { useMemo, useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
 import { motion } from 'framer-motion';
+
 import {
   Box,
   Container,
   Grid,
   Typography,
   Breadcrumbs,
-<<<<<<< HEAD
   Link as MUILink,
-=======
-  Link,
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
   Chip,
   Rating,
   Button,
@@ -35,7 +27,6 @@ import {
   TableCell,
   TableBody,
   List,
-<<<<<<< HEAD
   ListItemButton,
   ListItemText,
   Stack,
@@ -47,29 +38,23 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
 } from '@mui/material';
+
 import {
   ThumbUp as ThumbUpIcon,
   Person as PersonIcon,
   QuestionAnswer as QuestionAnswerIcon,
   ShoppingCart as ShoppingCartIcon,
 } from '@mui/icons-material';
+
 import { getProductDetail } from '../api/http';
 import http from '../api/http';
-=======
-  ListItem,
-  ListItemText
-} from '@mui/material';
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-<<<<<<< HEAD
   const location = useLocation();
-=======
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -78,7 +63,6 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-<<<<<<< HEAD
   const [addingToCart, setAddingToCart] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -86,60 +70,89 @@ export default function ProductDetail() {
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
   const [questionAuthDialogOpen, setQuestionAuthDialogOpen] = useState(false);
 
-  const sectionList = [
-    { key: 'desc', label: 'Mô tả sản phẩm' },
-    { key: 'ingredients', label: 'Thành phần' },
-    { key: 'benefit', label: 'Công dụng' },
-    { key: 'usage', label: 'Cách dùng' },
-    { key: 'sideEffect', label: 'Tác dụng phụ' },
-    { key: 'note', label: 'Lưu ý' },
-    { key: 'preserve', label: 'Bảo quản' },
-    { key: 'questions', label: 'Câu hỏi' },
-  ];
+  const sectionList = useMemo(
+    () => [
+      { key: 'desc', label: 'Mô tả sản phẩm' },
+      { key: 'ingredients', label: 'Thành phần' },
+      { key: 'benefit', label: 'Công dụng' },
+      { key: 'usage', label: 'Cách dùng' },
+      { key: 'sideEffect', label: 'Tác dụng phụ' },
+      { key: 'note', label: 'Lưu ý' },
+      { key: 'preserve', label: 'Bảo quản' },
+      { key: 'questions', label: 'Câu hỏi' },
+    ],
+    []
+  );
+
   const [activeSection, setActiveSection] = useState('desc');
   const sectionsRef = useRef({});
-=======
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
 
+  // Fetch product detail with graceful fallback
   useEffect(() => {
     let mounted = true;
+
     (async () => {
       try {
         if (!id) throw new Error('missing id');
         setLoading(true);
         setError('');
-<<<<<<< HEAD
-        const response = await getProductDetail(id);
-        const data = response?.data || response || null;
-        if (mounted) setProduct(data);
-      } catch (err) {
-        if (mounted) {
-          setError(err?.response?.data?.message || err?.message || 'Không thể tải thông tin sản phẩm');
+
+        let data = null;
+
+        // Try primary API (getProductDetail)
+        try {
+          const response = await getProductDetail(id);
+          data = response?.data || response || null;
+        } catch (primaryErr) {
+          // Fallback to direct fetch
+          try {
+            const res = await fetch(`http://127.0.0.1:8080/api/v1/products/detail/${id}`);
+            const json = await res.json();
+            data = json?.data || null;
+          } catch (fallbackErr) {
+            if (mounted) {
+              setError(
+                primaryErr?.response?.data?.message ||
+                  primaryErr?.message ||
+                  'Không thể tải thông tin sản phẩm'
+              );
+            }
+          }
         }
-=======
-        const res = await fetch(`http://127.0.0.1:8080/api/v1/products/detail/${id}`);
-        const json = await res.json();
-        const data = json?.data || null;
+
         if (mounted) setProduct(data);
-      } catch {
-        if (mounted) setError('Không thể tải thông tin sản phẩm');
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
+      } catch (outerErr) {
+        if (mounted) {
+          setError(
+            outerErr?.response?.data?.message ||
+              outerErr?.message ||
+              'Không thể tải thông tin sản phẩm'
+          );
+        }
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
+
+    return () => {
+      mounted = false;
+    };
   }, [id]);
 
   const images = useMemo(() => {
-    if (!product) return ['https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=1200&h=900&fit=crop'];
+    if (!product) {
+      return [
+        'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=1200&h=900&fit=crop',
+      ];
+    }
     const list = [];
     if (product.imageUrl) list.push(product.imageUrl);
     if (Array.isArray(product.images)) list.push(...product.images.filter(Boolean));
-    return list.length ? list : ['https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=1200&h=900&fit=crop'];
+    return list.length
+      ? list
+      : ['https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=1200&h=900&fit=crop'];
   }, [product]);
 
-<<<<<<< HEAD
   const formatCurrency = useCallback(
     (price) =>
       new Intl.NumberFormat('vi-VN', {
@@ -150,12 +163,8 @@ export default function ProductDetail() {
   );
 
   const inStock = (product?.quantity ?? 0) > 0;
-  const rx =
-    product?.precription !== undefined
-      ? product?.precription
-      : product?.prescription !== undefined
-      ? product?.prescription
-      : null;
+  // accept both "precription" (typo) and "prescription"
+  const rx = product?.precription ?? product?.prescription ?? null;
 
   const handleScrollTo = (key) => {
     const el = sectionsRef.current[key];
@@ -174,6 +183,7 @@ export default function ProductDetail() {
   const handleAddToCart = async () => {
     if (!product || !id || !inStock) return;
     if (!requireAuth()) return;
+
     try {
       setAddingToCart(true);
       const response = await http.post('/carts/items', { productId: id, quantity: qty });
@@ -182,7 +192,10 @@ export default function ProductDetail() {
         setSnackbar({ open: true, message: 'Đã thêm sản phẩm vào giỏ hàng!', severity: 'success' });
       }
     } catch (err) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.';
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     } finally {
       setAddingToCart(false);
@@ -192,22 +205,24 @@ export default function ProductDetail() {
   const handleBuyNow = async () => {
     if (!product || !id || !inStock) return;
     if (!requireAuth()) return;
+
     try {
       setAddingToCart(true);
       const response = await http.post('/carts/items', { productId: id, quantity: qty });
       const data = response?.data?.data || response?.data || response;
       if (data) navigate('/cart');
     } catch (err) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Không thể thực hiện mua ngay. Vui lòng thử lại.';
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Không thể thực hiện mua ngay. Vui lòng thử lại.';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     } finally {
       setAddingToCart(false);
     }
   };
 
-  const handleCloseSnackbar = (event, reason) => {
+  const handleCloseSnackbar = (_event, reason) => {
     if (reason === 'clickaway') return;
-    setSnackbar({ ...snackbar, open: false });
+    setSnackbar((s) => ({ ...s, open: false }));
   };
 
   const handleSubmitQuestion = async () => {
@@ -230,7 +245,6 @@ export default function ProductDetail() {
 
       const data = response?.data?.data || response?.data || response;
       if (data) {
-        // Add new question to the list
         const newQuestion = {
           questionId: data.questionId || Date.now().toString(),
           question: questionText.trim(),
@@ -250,7 +264,6 @@ export default function ProductDetail() {
         setSnackbar({ open: true, message: 'Đã đặt câu hỏi thành công!', severity: 'success' });
       }
     } catch (err) {
-      console.error('Error submitting question:', err);
       const errorMessage =
         err?.response?.data?.message || err?.message || 'Không thể đặt câu hỏi. Vui lòng thử lại.';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
@@ -259,6 +272,7 @@ export default function ProductDetail() {
     }
   };
 
+  // track active section
   useEffect(() => {
     if (!product) return;
     const observer = new IntersectionObserver(
@@ -269,20 +283,15 @@ export default function ProductDetail() {
       },
       { root: null, rootMargin: '-40% 0px -40% 0px', threshold: 0 }
     );
+
     sectionList.forEach((s) => {
       const el = sectionsRef.current[s.key];
       if (el) observer.observe(el);
     });
-    return () => observer.disconnect();
-  }, [product]);
-=======
-  const formatCurrency = (price) =>
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: product?.currency || 'VND' })
-      .format(Number(price || 0));
 
-  const inStock = (product?.quantity ?? 0) > 0;
-  const rx = product?.precription ?? product?.prescription ?? null;
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product]);
 
   if (loading) {
     return (
@@ -296,8 +305,12 @@ export default function ProductDetail() {
     return (
       <Box sx={{ py: 4, bgcolor: 'grey.50', minHeight: '60vh' }}>
         <Container maxWidth="lg">
-          <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
-          <Button variant="contained" onClick={() => navigate('/')}>Về trang chủ</Button>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+          <Button variant="contained" onClick={() => navigate('/')}>
+            Về trang chủ
+          </Button>
         </Container>
       </Box>
     );
@@ -316,18 +329,45 @@ export default function ProductDetail() {
   return (
     <Box sx={{ bgcolor: 'grey.50', py: 4, minHeight: '100vh' }}>
       <Container maxWidth="lg">
-<<<<<<< HEAD
         <Breadcrumbs sx={{ mb: 2 }} aria-label="breadcrumb">
-          <MUILink underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>Trang chủ</MUILink>
-          <MUILink underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/category/' + (product?.category || ''))}>{product?.category || 'Danh mục'}</MUILink>
+          <MUILink underline="hover" color="inherit" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+            Trang chủ
+          </MUILink>
+          <MUILink
+            underline="hover"
+            color="inherit"
+            sx={{ cursor: 'pointer' }}
+            onClick={() => navigate('/category/' + (product?.category || ''))}
+          >
+            {product?.category || 'Danh mục'}
+          </MUILink>
           <Typography color="text.primary">{product?.name || 'Chi tiết sản phẩm'}</Typography>
         </Breadcrumbs>
 
-        <Paper elevation={0} sx={{ borderRadius: 3, p: { xs: 2, md: 3 }, mb: 4, bgcolor: 'background.paper', boxShadow: '0 12px 28px rgba(0,0,0,0.06)', backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)' }}>
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 3,
+            p: { xs: 2, md: 3 },
+            mb: 4,
+            bgcolor: 'background.paper',
+            boxShadow: '0 12px 28px rgba(0,0,0,0.06)',
+            backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
+          }}
+        >
           <Grid container spacing={4}>
             <Grid item xs={12} md={5}>
               <Box>
-                <Box sx={{ borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider', mb: 2, bgcolor: 'grey.100' }}>
+                <Box
+                  sx={{
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    mb: 2,
+                    bgcolor: 'grey.100',
+                  }}
+                >
                   <motion.img
                     key={images[activeImg]}
                     src={images[activeImg]}
@@ -338,6 +378,7 @@ export default function ProductDetail() {
                     transition={{ duration: 0.35 }}
                   />
                 </Box>
+
                 {images.length > 1 && (
                   <ImageList cols={4} gap={10} sx={{ m: 0 }}>
                     {images.slice(0, 8).map((src, i) => (
@@ -352,7 +393,7 @@ export default function ProductDetail() {
                             objectFit: 'cover',
                             borderRadius: 10,
                             outline: i === activeImg ? '2px solid #1976d2' : '1px solid rgba(0,0,0,0.08)',
-                            filter: i === activeImg ? 'none' : 'saturate(0.9)'
+                            filter: i === activeImg ? 'none' : 'saturate(0.9)',
                           }}
                         />
                       </ImageListItem>
@@ -380,7 +421,12 @@ export default function ProductDetail() {
                   {product?.ratingAvg ? `${product.ratingAvg} đánh giá` : 'Chưa có đánh giá'}
                 </Typography>
                 {rx !== null && (
-                  <Chip size="small" label={rx ? 'Thuốc kê đơn (Rx)' : 'Không kê đơn (OTC)'} color={rx ? 'warning' : 'success'} sx={{ fontWeight: 500 }} />
+                  <Chip
+                    size="small"
+                    label={rx ? 'Thuốc kê đơn (Rx)' : 'Không kê đơn (OTC)'}
+                    color={rx ? 'warning' : 'success'}
+                    sx={{ fontWeight: 500 }}
+                  />
                 )}
                 <Chip size="small" label={inStock ? 'Còn hàng' : 'Hết hàng'} color={inStock ? 'success' : 'default'} sx={{ fontWeight: 500 }} />
                 {product?.soldQuantity > 0 && <Chip size="small" variant="outlined" label={`Đã bán ${product.soldQuantity}`} />}
@@ -442,40 +488,74 @@ export default function ProductDetail() {
               </Grid>
 
               <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: 'grey.50' }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>Thông tin sản phẩm</Typography>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
+                  Thông tin sản phẩm
+                </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Tên sản phẩm</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700 }}>{product?.name || '—'}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Tên sản phẩm
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                      {product?.name || '—'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Danh mục</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700 }}>{product?.category || 'Khác'}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Danh mục
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                      {product?.category || 'Khác'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Thương hiệu / Nhà sản xuất</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700 }}>{product?.manufacturer || 'Đang cập nhật'}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Thương hiệu / Nhà sản xuất
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                      {product?.manufacturer || 'Đang cập nhật'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Ngày sản phẩm</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700 }}>{product?.productDate || '—'}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Ngày sản phẩm
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                      {product?.productDate || '—'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Kê đơn</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700 }}>{rx === null ? '—' : rx ? 'Thuốc kê đơn (Rx)' : 'Không kê đơn (OTC)'}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Kê đơn
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                      {rx === null ? '—' : rx ? 'Thuốc kê đơn (Rx)' : 'Không kê đơn (OTC)'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Tồn kho</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700 }}>{product?.quantity ?? '—'}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Tồn kho
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                      {product?.quantity ?? '—'}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Đã bán</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700 }}>{product?.soldQuantity ?? 0}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Đã bán
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                      {product?.soldQuantity ?? 0}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>Tiền tệ</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 700 }}>{product?.currency || 'VND'}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Tiền tệ
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                      {product?.currency || 'VND'}
+                    </Typography>
                   </Grid>
                 </Grid>
               </Paper>
@@ -484,6 +564,7 @@ export default function ProductDetail() {
         </Paper>
 
         <Grid container spacing={4}>
+          {/* Sidebar mục lục */}
           <Grid item xs={12} md={3} sx={{ display: { xs: 'none', md: 'block' } }}>
             <Paper variant="outlined" sx={{ borderRadius: 2, position: 'sticky', top: 80, p: 0, overflow: 'hidden' }}>
               <List disablePadding>
@@ -502,13 +583,20 @@ export default function ProductDetail() {
                       '&:not(:last-of-type)': { borderBottom: '1px solid', borderBottomColor: 'divider' },
                     }}
                   >
-                    <ListItemText primary={<Typography variant="subtitle2" sx={{ fontWeight: activeSection === sec.key ? 800 : 500, lineHeight: 1.4 }}>{sec.label}</Typography>} />
+                    <ListItemText
+                      primary={
+                        <Typography variant="subtitle2" sx={{ fontWeight: activeSection === sec.key ? 800 : 500, lineHeight: 1.4 }}>
+                          {sec.label}
+                        </Typography>
+                      }
+                    />
                   </ListItemButton>
                 ))}
               </List>
             </Paper>
           </Grid>
 
+          {/* Nội dung các section */}
           <Grid item xs={12} md={9}>
             <SectionCard title="Mô tả sản phẩm" refEl={(el) => (sectionsRef.current['desc'] = el)} sectionId="desc">
               <Typography variant="body1" sx={{ lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
@@ -541,7 +629,9 @@ export default function ProductDetail() {
                   </Table>
                 </Paper>
               ) : (
-                <Typography variant="body1" sx={{ lineHeight: 1.8 }}>Đang cập nhật thành phần.</Typography>
+                <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
+                  Đang cập nhật thành phần.
+                </Typography>
               )}
             </SectionCard>
 
@@ -552,7 +642,9 @@ export default function ProductDetail() {
             </SectionCard>
 
             <SectionCard title="Cách dùng" refEl={(el) => (sectionsRef.current['usage'] = el)} sectionId="usage">
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>Cách dùng</Typography>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                Cách dùng
+              </Typography>
               <Typography variant="body1" sx={{ lineHeight: 1.8, whiteSpace: 'pre-wrap', mb: 2 }}>
                 {product?.usage || 'Đang cập nhật hướng dẫn sử dụng.'}
               </Typography>
@@ -565,8 +657,13 @@ export default function ProductDetail() {
             </SectionCard>
 
             <SectionCard refEl={(el) => (sectionsRef.current['note'] = el)} sectionId="note">
-              <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: 'warning.50', borderColor: 'warning.light', p: 2, mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'warning.dark', mb: 1 }}>Lưu ý</Typography>
+              <Paper
+                variant="outlined"
+                sx={{ borderRadius: 2, bgcolor: 'warning.50', borderColor: 'warning.light', p: 2, mb: 2 }}
+              >
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'warning.dark', mb: 1 }}>
+                  Lưu ý
+                </Typography>
                 {product?.note && (
                   <Typography variant="body1" sx={{ lineHeight: 1.8, whiteSpace: 'pre-wrap', mb: 2 }}>
                     {product.note}
@@ -582,7 +679,7 @@ export default function ProductDetail() {
             </SectionCard>
 
             <SectionCard title="Câu hỏi thường gặp" refEl={(el) => (sectionsRef.current['questions'] = el)} sectionId="questions" noDividerAtEnd>
-              {/* Question Input Form */}
+              {/* Form đặt câu hỏi */}
               <Paper
                 variant="outlined"
                 sx={{
@@ -610,13 +707,8 @@ export default function ProductDetail() {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                       bgcolor: 'white',
-                      '&:hover fieldset': {
-                        borderColor: 'primary.main',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: 'primary.main',
-                        borderWidth: 2,
-                      },
+                      '&:hover fieldset': { borderColor: 'primary.main' },
+                      '&.Mui-focused fieldset': { borderColor: 'primary.main', borderWidth: 2 },
                     },
                   }}
                   disabled={submittingQuestion}
@@ -626,12 +718,7 @@ export default function ProductDetail() {
                     variant="outlined"
                     onClick={() => setQuestionText('')}
                     disabled={submittingQuestion || !questionText.trim()}
-                    sx={{
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      px: 3,
-                    }}
+                    sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 3 }}
                   >
                     Hủy
                   </Button>
@@ -646,14 +733,8 @@ export default function ProductDetail() {
                       px: 4,
                       background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
                       boxShadow: '0 6px 16px rgba(33,203,243,.35)',
-                      '&:hover': {
-                        background: 'linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)',
-                        boxShadow: '0 10px 20px rgba(33,203,243,.45)',
-                      },
-                      '&:disabled': {
-                        background: 'rgba(0, 0, 0, 0.12)',
-                        boxShadow: 'none',
-                      },
+                      '&:hover': { background: 'linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)', boxShadow: '0 10px 20px rgba(33,203,243,.45)' },
+                      '&:disabled': { background: 'rgba(0, 0, 0, 0.12)', boxShadow: 'none' },
                     }}
                   >
                     {submittingQuestion ? (
@@ -668,7 +749,7 @@ export default function ProductDetail() {
                 </Box>
               </Paper>
 
-              {/* Questions List */}
+              {/* Danh sách câu hỏi */}
               {Array.isArray(product?.questions) && product.questions.length > 0 ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {product.questions.map((q, i) => {
@@ -679,8 +760,13 @@ export default function ProductDetail() {
                     const userName = q?.userName || 'Người dùng';
                     const avatarUrl = q?.avatarUrl || null;
                     const answers = Array.isArray(q?.answers) ? q.answers : [];
+
                     return (
-                      <Card key={questionId} variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', '&:hover': { boxShadow: 2, transition: 'all 0.2s ease-in-out' } }}>
+                      <Card
+                        key={questionId}
+                        variant="outlined"
+                        sx={{ borderRadius: 2, overflow: 'hidden', '&:hover': { boxShadow: 2, transition: 'all 0.2s ease-in-out' } }}
+                      >
                         <CardContent sx={{ p: 2.5 }}>
                           <Box sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
                             <Avatar src={avatarUrl} sx={{ width: 40, height: 40, bgcolor: 'primary.main' }}>
@@ -688,25 +774,45 @@ export default function ProductDetail() {
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{userName}</Typography>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                  {userName}
+                                </Typography>
                                 {createdDate && (
                                   <Typography variant="caption" color="text.secondary">
-                                    • {new Date(createdDate).toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                    •{' '}
+                                    {new Date(createdDate).toLocaleDateString('vi-VN', {
+                                      year: 'numeric',
+                                      month: '2-digit',
+                                      day: '2-digit',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })}
                                   </Typography>
                                 )}
                               </Box>
-                              <Typography variant="body1" sx={{ lineHeight: 1.7, color: 'text.primary', mb: 1.5 }}>{questionText}</Typography>
+                              <Typography variant="body1" sx={{ lineHeight: 1.7, color: 'text.primary', mb: 1.5 }}>
+                                {questionText}
+                              </Typography>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <IconButton size="small" sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}>
                                   <ThumbUpIcon fontSize="small" />
-                                  <Typography variant="caption" sx={{ ml: 0.5 }}>{likesCount > 0 ? likesCount : ''}</Typography>
+                                  <Typography variant="caption" sx={{ ml: 0.5 }}>
+                                    {likesCount > 0 ? likesCount : ''}
+                                  </Typography>
                                 </IconButton>
                                 {answers.length > 0 && (
-                                  <Chip icon={<QuestionAnswerIcon />} label={`${answers.length} trả lời`} size="small" variant="outlined" sx={{ height: 24 }} />
+                                  <Chip
+                                    icon={<QuestionAnswerIcon />}
+                                    label={`${answers.length} trả lời`}
+                                    size="small"
+                                    variant="outlined"
+                                    sx={{ height: 24 }}
+                                  />
                                 )}
                               </Box>
                             </Box>
                           </Box>
+
                           {answers.length > 0 && (
                             <Box sx={{ ml: 6, mt: 2, pl: 2, borderLeft: '2px solid', borderColor: 'divider' }}>
                               {answers.map((answer, ansIdx) => (
@@ -716,7 +822,9 @@ export default function ProductDetail() {
                                       <PersonIcon fontSize="small" />
                                     </Avatar>
                                     <Box>
-                                      <Typography variant="caption" sx={{ fontWeight: 700 }}>{answer.userName || 'Quản trị viên'}</Typography>
+                                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                                        {answer.userName || 'Quản trị viên'}
+                                      </Typography>
                                       <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
                                         {typeof answer === 'string' ? answer : answer.content || answer.answer || ''}
                                       </Typography>
@@ -732,15 +840,7 @@ export default function ProductDetail() {
                   })}
                 </Box>
               ) : (
-                <Paper
-                  variant="outlined"
-                  sx={{
-                    p: 4,
-                    textAlign: 'center',
-                    borderRadius: 2,
-                    bgcolor: 'grey.50',
-                  }}
-                >
+                <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderRadius: 2, bgcolor: 'grey.50' }}>
                   <QuestionAnswerIcon sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
                   <Typography variant="body1" color="text.secondary">
                     Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi về sản phẩm này!
@@ -752,6 +852,7 @@ export default function ProductDetail() {
         </Grid>
       </Container>
 
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -763,12 +864,18 @@ export default function ProductDetail() {
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
           variant="filled"
-          sx={{ width: '100%', borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', '& .MuiAlert-icon': { fontSize: 24 } }}
+          sx={{
+            width: '100%',
+            borderRadius: 2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            '& .MuiAlert-icon': { fontSize: 24 },
+          }}
         >
           {snackbar.message}
         </Alert>
       </Snackbar>
 
+      {/* Auth dialog: mua/giỏ hàng */}
       <Dialog open={authDialogOpen} onClose={() => setAuthDialogOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 800 }}>Yêu cầu đăng nhập</DialogTitle>
         <DialogContent dividers>
@@ -789,18 +896,11 @@ export default function ProductDetail() {
         </DialogActions>
       </Dialog>
 
-      {/* Question Auth Dialog */}
-      <Dialog
-        open={questionAuthDialogOpen}
-        onClose={() => setQuestionAuthDialogOpen(false)}
-        maxWidth="xs"
-        fullWidth
-      >
+      {/* Auth dialog: hỏi đáp */}
+      <Dialog open={questionAuthDialogOpen} onClose={() => setQuestionAuthDialogOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 800, color: 'primary.main' }}>Yêu cầu đăng nhập</DialogTitle>
         <DialogContent dividers>
-          <Typography variant="body1">
-            Vui lòng đăng nhập trước khi đặt câu hỏi về sản phẩm.
-          </Typography>
+          <Typography variant="body1">Vui lòng đăng nhập trước khi đặt câu hỏi về sản phẩm.</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setQuestionAuthDialogOpen(false)} sx={{ textTransform: 'none' }}>
@@ -817,9 +917,7 @@ export default function ProductDetail() {
               textTransform: 'none',
               fontWeight: 600,
               background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-              '&:hover': {
-                background: 'linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)',
-              },
+              '&:hover': { background: 'linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)' },
             }}
           >
             Đăng nhập
@@ -836,11 +934,19 @@ function SectionCard({ title, children, refEl, sectionId, noDividerAtEnd }) {
       variant="outlined"
       ref={refEl}
       id={sectionId}
-      sx={{ borderRadius: 2, p: { xs: 2, md: 3 }, mb: 3, scrollMarginTop: '80px', boxShadow: '0 8px 24px rgba(0,0,0,0.02)' }}
+      sx={{
+        borderRadius: 2,
+        p: { xs: 2, md: 3 },
+        mb: 3,
+        scrollMarginTop: '80px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.02)',
+      }}
     >
       {title && (
         <>
-          <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.3, mb: 2 }}>{title}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.3, mb: 2 }}>
+            {title}
+          </Typography>
           <Divider sx={{ mb: 2 }} />
         </>
       )}
@@ -849,172 +955,3 @@ function SectionCard({ title, children, refEl, sectionId, noDividerAtEnd }) {
     </Paper>
   );
 }
-=======
-        <Breadcrumbs sx={{ mb: 3 }} aria-label="breadcrumb">
-          <Link underline="hover" color="inherit" onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}>
-            Trang chủ
-          </Link>
-          <Typography color="text.primary">Chi tiết sản phẩm</Typography>
-        </Breadcrumbs>
-
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={0} sx={{ p: 2, borderRadius: 3 }}>
-              <Box sx={{ borderRadius: 3, overflow: 'hidden', mb: 2 }}>
-                <motion.img
-                  key={images[activeImg]}
-                  src={images[activeImg]}
-                  alt={product?.name}
-                  style={{ width: '100%', height: 420, objectFit: 'cover', display: 'block' }}
-                  initial={{ opacity: 0.6, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.35 }}
-                />
-              </Box>
-              {images.length > 1 && (
-                <ImageList cols={4} gap={10} sx={{ m: 0 }}>
-                  {images.slice(0, 8).map((src, i) => (
-                    <ImageListItem key={i} onClick={() => setActiveImg(i)} style={{ cursor: 'pointer' }}>
-                      <img
-                        src={src}
-                        alt={`thumb-${i}`}
-                        loading="lazy"
-                        style={{
-                          height: 80,
-                          width: '100%',
-                          objectFit: 'cover',
-                          borderRadius: 10,
-                          outline: i === activeImg ? '2px solid #1976d2' : 'none'
-                        }}
-                      />
-                    </ImageListItem>
-                  ))}
-                </ImageList>
-              )}
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 'bold', mb: 1 }}>
-              {product?.name}
-            </Typography>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Rating value={Number(product?.ratingAvg) || 0} readOnly precision={0.1} size="small" />
-              <Typography variant="body2" color="text.secondary">({product?.ratingAvg || 0} đánh giá)</Typography>
-              {rx !== null && <Chip size="small" label={rx ? 'Thuốc kê đơn (Rx)' : 'Không kê đơn (OTC)'} color={rx ? 'warning' : 'success'} />}
-              <Chip size="small" label={inStock ? 'Còn hàng' : 'Hết hàng'} color={inStock ? 'success' : 'default'} />
-            </Box>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                {formatCurrency(product?.originPrice)}
-              </Typography>
-            </Box>
-
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, whiteSpace: 'pre-wrap' }}>
-              {product?.description || 'Sản phẩm chăm sóc sức khỏe chất lượng cao từ MedStore.'}
-            </Typography>
-
-            <Grid container spacing={2} alignItems="center" sx={{ mb: 3 }}>
-              <Grid item>
-                <TextField
-                  type="number"
-                  size="small"
-                  label="Số lượng"
-                  value={qty}
-                  onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
-                  inputProps={{ min: 1, style: { width: 90 } }}
-                />
-              </Grid>
-              <Grid item>
-                <Button variant="contained" size="large" disabled={!inStock}>Thêm vào giỏ</Button>
-              </Grid>
-              <Grid item>
-                <Button variant="outlined" size="large" disabled={!inStock}>Mua ngay</Button>
-              </Grid>
-            </Grid>
-
-            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>Thông tin sản phẩm</Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Grid container spacing={2}>
-                {/* <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">id</Typography><Typography variant="body1">{product?.id}</Typography></Grid> */}
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">name</Typography><Typography variant="body1">{product?.name}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">category</Typography><Typography variant="body1">{product?.category || 'Khác'}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">manufacturer</Typography><Typography variant="body1">{product?.manufacturer || 'Đang cập nhật'}</Typography></Grid>
-                {/* <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">manufactureId</Typography><Typography variant="body1">{product?.manufactureId || '—'}</Typography></Grid> */}
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">precription</Typography><Typography variant="body1">{String(product?.precription ?? '—')}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">originPrice</Typography><Typography variant="body1">{formatCurrency(product?.originPrice)}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">ratingAvg</Typography><Typography variant="body1">{product?.ratingAvg ?? 0}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">productDate</Typography><Typography variant="body1">{product?.productDate || '—'}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">quantity</Typography><Typography variant="body1">{product?.quantity ?? '—'}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">currency</Typography><Typography variant="body1">{product?.currency || 'VND'}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">soldQuantity</Typography><Typography variant="body1">{product?.soldQuantity ?? 0}</Typography></Grid>
-                <Grid item xs={12}><Typography variant="body2" color="text.secondary">usage</Typography><Typography variant="body1">{product?.usage || '—'}</Typography></Grid>
-                <Grid item xs={12}><Typography variant="body2" color="text.secondary">note</Typography><Typography variant="body1">{product?.note || '—'}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">benefit</Typography><Typography variant="body1">{product?.benefit || '—'}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">sideEffect</Typography><Typography variant="body1">{product?.sideEffect || '—'}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">preserve</Typography><Typography variant="body1">{product?.preserve || '—'}</Typography></Grid>
-                <Grid item xs={12} sm={6}><Typography variant="body2" color="text.secondary">questions</Typography><Typography variant="body1">{Array.isArray(product?.questions) ? `${product.questions.length} mục` : '—'}</Typography></Grid>
-              </Grid>
-            </Paper>
-          </Grid>
-        </Grid>
-
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>Mô tả chi tiết</Typography>
-          <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
-              {product?.description || 'Đang cập nhật nội dung chi tiết sản phẩm.'}
-            </Typography>
-          </Paper>
-        </Box>
-
-        {!!(product?.ingredients || [])?.length && (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>Thành phần (ingredients)</Typography>
-            <Paper variant="outlined" sx={{ borderRadius: 2 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Tên</TableCell>
-                    <TableCell>Hàm lượng</TableCell>
-                    <TableCell>Đơn vị</TableCell>
-                    <TableCell>Mô tả</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {product.ingredients.map((ing, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell>{ing?.name || '—'}</TableCell>
-                      <TableCell>{ing?.amount ?? '—'}</TableCell>
-                      <TableCell>{ing?.unit || '—'}</TableCell>
-                      <TableCell>{ing?.description || '—'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Paper>
-          </Box>
-        )}
-
-        {!!(product?.questions || [])?.length && (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>Câu hỏi</Typography>
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-              <List dense>
-                {product.questions.map((q, i) => (
-                  <ListItem key={i} disableGutters>
-                    <ListItemText primary={`• ${typeof q === 'string' ? q : JSON.stringify(q)}`} />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          </Box>
-        )}
-      </Container>
-    </Box>
-  );
-}
->>>>>>> b5ee9664cc5897193156b6741d46e015c812dcb0
