@@ -24,7 +24,8 @@ export default function Register() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+  const [form, setForm] = useState({ username: '', password: '', repeat: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -33,9 +34,26 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validation: kiểm tra password và repeat phải giống nhau
+    if (form.password !== form.repeat) {
+      setError('Mật khẩu xác nhận không khớp. Vui lòng thử lại.');
+      return;
+    }
+
+    // Validation: kiểm tra độ dài mật khẩu
+    if (form.password.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự.');
+      return;
+    }
+
     setLoading(true);
     try {
-      await apiRegister(form);
+      await apiRegister({
+        username: form.username,
+        password: form.password,
+        repeat: form.repeat
+      });
       navigate('/login');
     } catch (err) {
       setError(err?.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
@@ -163,6 +181,51 @@ export default function Register() {
                   )
                 }}
                 sx={{ 
+                  mb: 2,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    },
+                    '&.Mui-focused': {
+                      backgroundColor: 'rgba(255, 255, 255, 1)',
+                    }
+                  }
+                }}
+              />
+
+              <TextField
+                margin="normal"
+                fullWidth
+                label="Xác nhận mật khẩu"
+                name="repeat"
+                type={showRepeatPassword ? 'text' : 'password'}
+                value={form.repeat}
+                onChange={handleChange}
+                required
+                error={form.repeat !== '' && form.password !== form.repeat}
+                helperText={form.repeat !== '' && form.password !== form.repeat ? 'Mật khẩu xác nhận không khớp' : ''}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock sx={{ color: 'primary.main' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton 
+                        onClick={() => setShowRepeatPassword((s) => !s)} 
+                        edge="end" 
+                        aria-label="toggle repeat password visibility"
+                        sx={{ color: 'primary.main' }}
+                      >
+                        {showRepeatPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+                sx={{ 
                   mb: 3,
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
@@ -182,7 +245,7 @@ export default function Register() {
                 fullWidth 
                 variant="contained" 
                 size="large" 
-                disabled={loading || !form.username || !form.password}
+                disabled={loading || !form.username || !form.password || !form.repeat || form.password !== form.repeat}
                 sx={{ 
                   mt: 2, 
                   py: 1.5,

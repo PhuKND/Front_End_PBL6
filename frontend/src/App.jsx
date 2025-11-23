@@ -14,6 +14,8 @@ import SearchResults from './components/SearchResults';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProductsOverview from './pages/ProductsOverview';
 import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import Profile from './pages/Profile';
 import './App.css';
 
 function App() {
@@ -72,6 +74,24 @@ function App() {
                       element={
                         <ProtectedRoute requiredRole="USER">
                           <CartPage />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/checkout"
+                      element={
+                        <ProtectedRoute requiredRole="USER">
+                          <CheckoutPage />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/profile"
+                      element={
+                        <ProtectedRoute requiredRole="USER">
+                          <Profile />
                         </ProtectedRoute>
                       }
                     />

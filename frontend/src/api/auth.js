@@ -61,8 +61,12 @@ export function clearAuthTokens() {
   localStorage.removeItem('userRole');
 }
 
-export async function apiRegister({ username, password }) {
-  const res = await http.post('/users', { username, password });
+export async function apiRegister({ username, password, repeat }) {
+  const res = await http.post('/users', { 
+    username, 
+    password, 
+    repeat 
+  });
   return res.data;
 }
 

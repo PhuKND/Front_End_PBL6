@@ -50,6 +50,14 @@ export default function Router() {
           ),
           path: "cart",
         },
+        {
+          element: (
+            <ProtectedRoute requiredRole="USER">
+              <CheckoutPage />
+            </ProtectedRoute>
+          ),
+          path: "checkout",
+        },
 
         
         
@@ -127,6 +135,7 @@ const ConsultPage = Loadable(lazy(() => import("../pages/ConsultPage")));
 const ProductDetail = Loadable(lazy(() => import("../pages/ProductDetail")));
 const SearchResults = Loadable(lazy(() => import("../components/SearchResults")));
 const CartPage = Loadable(lazy(() => import("../pages/CartPage")));
+const CheckoutPage = Loadable(lazy(() => import("../pages/CheckoutPage")));
 
 
 const MainLayout = Loadable(lazy(() => import("../layout/Main")));
