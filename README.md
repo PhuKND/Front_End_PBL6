@@ -1,2 +1,2 @@
 # MedStore
-Trang web chuyên bán và cung cấp thuốc và vật tư y tế
+Trang web chuyên cung cấp thuốc và vật tư y tế
