@@ -87,7 +87,6 @@ export default function ProductDetail() {
   const [activeSection, setActiveSection] = useState('desc');
   const sectionsRef = useRef({});
 
-  // Fetch product detail with graceful fallback
   useEffect(() => {
     let mounted = true;
 
@@ -99,12 +98,10 @@ export default function ProductDetail() {
 
         let data = null;
 
-        // Try primary API (getProductDetail)
         try {
           const response = await getProductDetail(id);
           data = response?.data || response || null;
         } catch (primaryErr) {
-          // Fallback to direct fetch
           try {
             const res = await fetch(`http://127.0.0.1:8080/api/v1/products/detail/${id}`);
             const json = await res.json();
@@ -163,7 +160,6 @@ export default function ProductDetail() {
   );
 
   const inStock = (product?.quantity ?? 0) > 0;
-  // accept both "precription" (typo) and "prescription"
   const rx = product?.precription ?? product?.prescription ?? null;
 
   const handleScrollTo = (key) => {
@@ -272,7 +268,6 @@ export default function ProductDetail() {
     }
   };
 
-  // track active section
   useEffect(() => {
     if (!product) return;
     const observer = new IntersectionObserver(
@@ -290,7 +285,6 @@ export default function ProductDetail() {
     });
 
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 
   if (loading) {

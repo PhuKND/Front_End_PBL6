@@ -35,7 +35,6 @@ const checkApiHealth = async () => {
   }
 };
 
-// Thử health nhiều lần ngắn (tránh “lần đầu chưa kịp ấm”)
 const ensureApiHealthy = async (retries = 2, baseDelay = 300) => {
   for (let i = 0; i <= retries; i++) {
     const ok = await checkApiHealth();
@@ -72,7 +71,6 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
 
   const resetFileInput = () => {
     if (fileInputRef.current) {
-      // Xóa giá trị để lần sau chọn lại cùng file vẫn fire onChange
       fileInputRef.current.value = '';
     }
   };
@@ -93,7 +91,6 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
     reader.onload = (e) => setPreview(e.target.result);
     reader.readAsDataURL(file);
 
-    // Quan trọng: reset input ngay sau khi đọc
     resetFileInput();
   };
 
@@ -152,21 +149,18 @@ const ImageUpload = ({ open, onClose, onImageProcessed }) => {
     setResult(null);
 
     try {
-      // Thử “làm ấm” API nhưng KHÔNG chặn luồng nếu chưa healthy
       await ensureApiHealthy(2, 300);
 
       let data;
       try {
         data = await sendClassify(file);
       } catch (err1) {
-        // Retry 1 lần ngắn nếu lần đầu fail (thường do warm-up)
         await sleep(500);
         data = await sendClassify(file);
       }
 
       const normalized = normalizeApiResult(data);
 
-      // Nới điều kiện: chỉ cần có prediction, không bắt buộc confidence
       if (!normalized.prediction) {
         throw new Error('Dữ liệu trả về không hợp lệ');
       }

@@ -51,7 +51,6 @@ import CameraModal from './CameraModal';
 import ImageUpload from './ImageUpload';
 import { clearAuthTokens, apiLogout, getUserRole } from '../api/auth';
 
-// ================= styled =================
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: theme.shape.borderRadius,
@@ -92,7 +91,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-// ================= component =================
 const Header = ({ onSearch }) => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -117,7 +115,6 @@ const Header = ({ onSearch }) => {
     'Tư vấn với Bác Sĩ',
   ];
 
-  // -------- auth state from localStorage + events --------
   useEffect(() => {
     const checkAuthStatus = () => {
       const accessToken = localStorage.getItem('accessToken');
@@ -157,7 +154,7 @@ const Header = ({ onSearch }) => {
     };
   }, []);
 
-  // -------- handlers --------
+
   const handleSearch = (e) => {
     e.preventDefault();
     const keyword = searchQuery.trim();
@@ -590,7 +587,6 @@ const Header = ({ onSearch }) => {
             <ListItemButton
               onClick={() => {
                 toggleMenu();
-                // TODO: điều hướng trang hỗ trợ nếu có
               }}
             >
               <ListItemText primary="Hỗ trợ khách hàng" />

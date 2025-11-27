@@ -67,8 +67,7 @@ const AdminUser = () => {
       setLoading(true);
       setError('');
       const response = await http.get('/users/all');
-      
-      // Handle different response structures
+
       let userList = [];
       if (Array.isArray(response.data)) {
         userList = response.data;

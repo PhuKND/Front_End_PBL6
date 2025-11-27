@@ -157,13 +157,10 @@ export default function Profile() {
         formData.append('image', avatarFile);
       }
 
-      // Đảm bảo token được thêm vào request
       const accessToken = localStorage.getItem('accessToken');
       const response = await http.patch('/users/info', formData, {
         timeout: 30000,
         headers: {
-          // Authorization header sẽ được thêm tự động bởi interceptor
-          // Nhưng đảm bảo nó được set nếu cần
           ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         },
       });

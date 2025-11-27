@@ -35,13 +35,11 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    // Validation: kiểm tra password và repeat phải giống nhau
     if (form.password !== form.repeat) {
       setError('Mật khẩu xác nhận không khớp. Vui lòng thử lại.');
       return;
     }
 
-    // Validation: kiểm tra độ dài mật khẩu
     if (form.password.length < 6) {
       setError('Mật khẩu phải có ít nhất 6 ký tự.');
       return;

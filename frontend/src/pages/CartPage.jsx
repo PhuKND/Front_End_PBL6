@@ -64,8 +64,7 @@ export default function CartPage() {
       setLoading(true);
       setError('');
       const response = await http.get('/carts/items/mycarts');
-      
-      // Handle different response structures
+
       let items = [];
       if (Array.isArray(response.data)) {
         items = response.data;
@@ -93,8 +92,7 @@ export default function CartPage() {
     try {
       setUpdating({ ...updating, [productId]: true });
       await http.put(`/carts/items/${productId}`, { quantity: newQuantity });
-      
-      // Update local state
+
       setCartItems(prevItems =>
         prevItems.map(item =>
           item.productId === productId

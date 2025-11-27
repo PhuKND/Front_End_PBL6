@@ -1,2 +1,2 @@
 # Medical-Store
-Store sell medical equipment, machine  capsule
+Trang web chuyên bán và cung cấp thuốc và vật tư y tế

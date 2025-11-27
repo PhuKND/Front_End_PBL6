@@ -81,7 +81,6 @@ export default function CheckoutPage() {
       setLoading(true);
       setError('');
 
-      // Load cart items
       const cartResponse = await http.get('/carts/items/mycarts');
       let items = [];
       if (Array.isArray(cartResponse.data)) {
@@ -100,7 +99,7 @@ export default function CheckoutPage() {
 
       setCartItems(items);
 
-      // Load user info
+
       try {
         const userResponse = await http.get('/users/info');
         const userData = userResponse.data?.data || userResponse.data;
@@ -144,7 +143,6 @@ export default function CheckoutPage() {
 
   const handleNext = () => {
     if (activeStep === 0) {
-      // Validate delivery info
       if (!orderData.address || !orderData.city || !orderData.ward || !orderData.phoneNumber) {
         setError('Vui lòng điền đầy đủ thông tin giao hàng.');
         return;
@@ -152,7 +150,6 @@ export default function CheckoutPage() {
       setActiveStep(activeStep + 1);
       setError('');
     } else if (activeStep === 1) {
-      // Move to payment step and auto-submit
       setActiveStep(activeStep + 1);
       handleSubmitOrder();
     }
@@ -168,7 +165,6 @@ export default function CheckoutPage() {
       setSubmitting(true);
       setError('');
 
-      // Prepare order data
       const itemOrders = cartItems.map(item => ({
         productId: item.productId,
         quantity: item.quantity,
@@ -185,13 +181,11 @@ export default function CheckoutPage() {
         paymentNote: orderData.paymentNote || '',
       };
 
-      // Submit order
       const response = await http.post('/order/', orderPayload);
 
       const orderResponse = response.data?.data || response.data;
 
       if (orderResponse?.redirectUrl) {
-        // Redirect to VNPAY
         window.location.href = orderResponse.redirectUrl;
       } else {
         setError('Không nhận được URL thanh toán. Vui lòng thử lại.');

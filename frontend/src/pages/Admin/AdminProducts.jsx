@@ -90,8 +90,7 @@ const AdminProducts = () => {
       setLoading(true);
       setError('');
       const response = await fetchProducts(currentPage, pageSize);
-      
-      // Handle different response structures
+
       let list = [];
       let total = 0;
       
@@ -111,13 +110,11 @@ const AdminProducts = () => {
       
       setProducts(Array.isArray(list) ? list : []);
       setTotalElements(total);
-      
-      // Check if there's a next page
+
       if (total > 0) {
         const totalPages = Math.max(1, Math.ceil(Number(total) / pageSize));
         setHasNext(currentPage < totalPages - 1);
       } else {
-        // If no total, check if current page has full pageSize items
         setHasNext(list.length === pageSize);
       }
     } catch (err) {
@@ -190,15 +187,13 @@ const AdminProducts = () => {
     ));
   }, []);
 
-  // Helper function to convert date from YYYY-MM-DD to YYYY/M/D format
   const formatDateForAPI = (dateString) => {
     if (!dateString) return '';
-    // Date picker returns YYYY-MM-DD, convert to YYYY/M/D
     const parts = dateString.split('-');
     if (parts.length === 3) {
       const year = parts[0];
-      const month = parseInt(parts[1], 10); // Remove leading zero
-      const day = parseInt(parts[2], 10); // Remove leading zero
+      const month = parseInt(parts[1], 10); 
+      const day = parseInt(parts[2], 10); 
       return `${year}/${month}/${day}`;
     }
     return dateString;
@@ -207,17 +202,15 @@ const AdminProducts = () => {
   const handleSubmitAdd = useCallback(async () => {
     try {
       setSubmitting(true);
-      
-      // Validate required fields
+
       if (!form.name || !form.price) {
         alert('Vui lòng điền đầy đủ thông tin bắt buộc (Tên sản phẩm và Giá)');
         setSubmitting(false);
         return;
       }
 
-      // Convert ingredients array to JSON string
       const filteredIngredients = ingredients
-        .filter(ing => ing.name && ing.name.trim() !== '') // Only include ingredients with name
+        .filter(ing => ing.name && ing.name.trim() !== '') 
         .map(ing => ({
           name: ing.name.trim(),
           amount: Number(ing.amount) || 0,
@@ -233,8 +226,7 @@ const AdminProducts = () => {
       fd.append('price', form.price);
       fd.append('currency', form.currency || 'VND');
       fd.append('quantity', form.quantity || '0');
-      
-      // Convert date format from YYYY-MM-DD to YYYY/M/D
+
       fd.append('productDate', formatDateForAPI(form.productDate));
       fd.append('expirationDate', formatDateForAPI(form.expirationDate));
       
@@ -247,8 +239,7 @@ const AdminProducts = () => {
       fd.append('preserve', (form.preserve || '').trim());
       fd.append('ingredients', ingredientsJson); 
       fd.append('precription', form.precription || 'false');
-      
-      // Only append images if there are any
+
       images.forEach((f) => fd.append('images', f));
 
       const res = await http.post('/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });

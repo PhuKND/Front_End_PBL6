@@ -43,19 +43,15 @@ const HomePage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
-  
-  // Refs for carousels
+
   const flashSaleScrollRef = useRef(null);
   const bestSellerScrollRef = useRef(null);
-  
-  // Hero slider state
+
   const [currentSlide, setCurrentSlide] = useState(0);
-  
-  // Flash sale state
+
   const [flashSaleTab, setFlashSaleTab] = useState(0);
   const [countdown, setCountdown] = useState({ hours: 10, minutes: 12, seconds: 53 });
 
-  // Hero slides data
   const heroSlides = [
     {
       id: 1,
@@ -83,7 +79,6 @@ const HomePage = () => {
     }
   ];
 
-  // Auto-rotate hero slider
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -91,7 +86,6 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, [heroSlides.length]);
 
-  // Countdown timer
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -112,7 +106,6 @@ const HomePage = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Quick action cards data
   const quickActions = [
     {
       id: 1,
@@ -144,7 +137,6 @@ const HomePage = () => {
     }
   ];
 
-  // Featured categories data
   const featuredCategories = [
     { id: 1, slug: 'than-kinh-nao', name: 'Thần kinh não', productCount: 57 },
     { id: 2, slug: 'vitamin-khoang-chat', name: 'Vitamin & Khoáng chất', productCount: 113 },
@@ -160,7 +152,6 @@ const HomePage = () => {
     { id: 12, slug: 'ho-tro-tinh-duc', name: 'Hỗ trợ tình dục', productCount: 41 }
   ];
 
-  // Flash sale products data
   const flashSaleProducts = [
     {
       id: 201,
@@ -224,7 +215,6 @@ const HomePage = () => {
     }
   ];
 
-  // Best-selling products data
   const bestSellingProducts = [
     {
       id: 301,
@@ -300,14 +290,12 @@ const HomePage = () => {
     }
   ];
 
-  // Flash sale session tabs
   const flashSaleSessions = [
     { label: '08:00 - 22:00, Hôm nay', status: 'Đang diễn ra' },
     { label: '08:00 - 22:00, Ngày mai', status: 'Sắp diễn ra' },
     { label: '08:00 - 22:00, Ngày kia', status: 'Sắp diễn ra' }
   ];
 
-  // Carousel scroll handlers
   const scrollFlashSale = (direction) => {
     if (flashSaleScrollRef.current) {
       flashSaleScrollRef.current.scrollBy({
